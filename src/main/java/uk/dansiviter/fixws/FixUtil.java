@@ -15,6 +15,7 @@
  */
 package uk.dansiviter.fixws;
 
+import static quickfix.MessageUtils.getReverseSessionID;
 import static quickfix.MessageUtils.getSessionID;
 
 import quickfix.Message;
@@ -28,7 +29,11 @@ import quickfix.field.TargetCompID;
 import quickfix.field.TargetLocationID;
 import quickfix.field.TargetSubID;
 
-public enum Util { ;
+/**
+ * @author Daniel Siviter
+ * @since v1.0 [13 Nov 2019]
+ */
+public enum FixUtil { ;
 	/**
 	 *
 	 * @param message
@@ -37,6 +42,28 @@ public enum Util { ;
 	 */
 	public static SessionID sessionId(Message message) {
 		return getSessionID(message);
+	}
+
+	/**
+	 *
+	 * @param message
+	 * @return
+	 * @see quickfix.MessageUtils#getReverseSessionID(Message)
+	 */
+	public static SessionID reverseSessionID(Message message) {
+		return getReverseSessionID(message);
+	}
+
+	/**
+	 *
+	 * @param sessionId
+	 * @return
+	 */
+	public static SessionID reverse(SessionID sessionId) {
+		return new SessionID(sessionId.getBeginString(),
+				sessionId.getTargetCompID(), sessionId.getTargetSubID(), sessionId.getTargetLocationID(),
+				sessionId.getSenderCompID(), sessionId.getSenderSubID(), sessionId.getSenderLocationID(),
+				null);
 	}
 
 	/**
@@ -57,7 +84,18 @@ public enum Util { ;
         optionallySetID(header, TargetSubID.FIELD, sessionId.getTargetSubID());
 		optionallySetID(header, TargetLocationID.FIELD, sessionId.getTargetLocationID());
 		return message;
-    }
+	}
+
+	/**
+	 *
+	 * @param <M>
+	 * @param sessionId
+	 * @param message
+	 * @return
+	 */
+	public static <M extends Message> M setReverse(SessionID sessionId, M message) {
+		return set(reverse(sessionId), message);
+	}
 
     private static void optionallySetID(Header header, int field, String value) {
         if (!value.equals(SessionID.NOT_SET)) {

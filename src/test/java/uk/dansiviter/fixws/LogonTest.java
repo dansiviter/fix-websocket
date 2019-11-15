@@ -15,6 +15,9 @@
  */
 package uk.dansiviter.fixws;
 
+import static uk.dansiviter.fixws.FixUtil.setReverse;
+import static uk.dansiviter.fixws.FixUtil.sessionId;
+
 import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
@@ -42,7 +45,6 @@ import org.junit.jupiter.api.Test;
 import quickfix.FixVersions;
 import quickfix.InvalidMessage;
 import quickfix.Message;
-import quickfix.MessageUtils;
 import quickfix.SessionID;
 import quickfix.field.DefaultApplVerID;
 import quickfix.field.EncryptMethod;
@@ -75,7 +77,7 @@ public class LogonTest extends AbstractTest {
 	private SynchronousQueue<Message> queue = new SynchronousQueue<Message>();
 
 	@Test
-	public void logon() throws DeploymentException, IOException, InterruptedException, InvalidMessage, EncodeException {
+	public void test() throws DeploymentException, IOException, InterruptedException, InvalidMessage, EncodeException {
 		final ClientManager client = createClient();
 
 		final Session session = client.connectToServer(new Endpoint() {
@@ -88,7 +90,7 @@ public class LogonTest extends AbstractTest {
 							queue.add(message);
 						}
 					});
-					session.getBasicRemote().sendObject(defaults(logonMsg()));
+					session.getBasicRemote().sendObject(defaults(logon()));
 				} catch (Exception e) {
 					throw new IllegalStateException(e);
 				}
@@ -110,7 +112,10 @@ public class LogonTest extends AbstractTest {
 		session.close();
 	}
 
-	private static Logon logonMsg() {
+
+	// --- Static Methods ---
+
+	private static Logon logon() {
 		final Logon logon = new Logon();
 		logon.set(new HeartBtInt(30));
 		logon.set(new ResetSeqNumFlag(true));
@@ -129,15 +134,20 @@ public class LogonTest extends AbstractTest {
 		return news;
 	}
 
+
+	// --- Inner Classes ---
+
+	/**
+	 *
+	 */
 	@ApplicationScoped
 	public static class TestHandler {
 		@Inject @ToApp
 		private Event<Message> evt;
 
-		// some sort of issue with 5.0 MessageFactory which means types are not rendering
 		public void on(@Observes @FromApp News req) {
-			SessionID sessionId = MessageUtils.getReverseSessionID(req);
-			evt.fire(Util.set(sessionId, news("World", "Hello")));
+			final SessionID sessionId = sessionId(req);
+			evt.fire(setReverse(sessionId, news("World", "Hello")));
 		}
 	}
 }

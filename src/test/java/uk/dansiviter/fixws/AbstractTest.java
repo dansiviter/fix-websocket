@@ -30,7 +30,6 @@ import javax.websocket.EncodeException;
 import javax.websocket.Encoder;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
-import javax.websocket.Decoder.Text;
 import javax.websocket.server.ServerApplicationConfig;
 import javax.websocket.server.ServerEndpointConfig;
 
@@ -81,13 +80,15 @@ public abstract class AbstractTest extends TestContainer {
 	 * @return
 	 */
 	protected <M extends Message> M defaults(M message) {
-		return defaults(message, "foo", "bar");
+		return defaults(message, "client", "server");
 	}
 
 	/**
 	 *
 	 * @param <M>
 	 * @param message
+	 * @param senderCompId
+	 * @param targetCompId
 	 * @return
 	 */
 	protected <M extends Message> M defaults(M message, String senderCompId, String targetCompId) {
@@ -111,6 +112,7 @@ public abstract class AbstractTest extends TestContainer {
 				.encoders(List.of(Encoding.class))
 				.build();
 	}
+
 
 	// --- Inner Classes ---
 

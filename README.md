@@ -1,8 +1,11 @@
 # FIX WebSocket #
 
-A simple JSR WebSocket implementation that uses CDI for lifecycle and eventing.
+A simple JSR WebSocket implementation that uses CDI for lifecycle and eventing. For example usage take a look at `uk.dansiviter.fixws.LogonTest`.
 
-> :information_source: This only permit dynamic sessions at this time as no static `SessionProvider` has been implemented.
+There are a number of limitations at the moment:
+* This only permit dynamic FIX 5.0 sessions at this time. Ideally there will also be static sessions provider too to limit connecions. In a production system this would likely be centralised in a datastore so it could be dynamically updated,
+* FIX specification version is fixed at the moment at 5.0. Both the WebSocket subprotocols and the Logon Handshake should permit different versions, but I just wanted to get this working,
+* More testing is required to see if older FIXT 1.1/5.0 protocols work as they are a single spec rather than split,
 
 ## Receiving Messages ##
 
@@ -50,4 +53,4 @@ Either:
 
 **I've created a new message, but how does it know where to send it?**
 
-Use `uk.dansiviter.fixws.Util.set(sessionId, message)` on the object and it'll be extracted and used when the event is fired.
+The `quickfix.Message` must have the session it wishes to send to of the CDI event. Use the methods in `uk.dansiviter.fixws.Util` to assist with this.

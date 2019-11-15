@@ -99,10 +99,18 @@ public class FixApplication implements Application {
 		evt.fireAsync(message);
 	}
 
+	/**
+	 *
+	 * @param message
+	 */
 	public void onAsync(@ObservesAsync @ToApp Message message) {
 		on(message);
 	}
 
+	/**
+	 *
+	 * @param message
+	 */
 	public void on(@Observes @ToApp Message message) {
 		final SessionID sessionId = MessageUtils.getSessionID(message);
 		final quickfix.Session session = quickfix.Session.lookupSession(sessionId);
@@ -110,8 +118,11 @@ public class FixApplication implements Application {
 			throw messages().sessionNotFound(sessionId);
 		}
 
-		// not sure why this isn't set!
-		message.getHeader().setField(session.getSenderDefaultApplicationVersionID());
+		if (sessionId.isFIXT()) {  // required for correct deserialisation on client app.
+			if (!message.getHeader().isSetField(ApplVerID.FIELD)) {
+				message.getHeader().setField(session.getSenderDefaultApplicationVersionID());
+			}
+		}
 
 		final DataDictionaryProvider dataDictionaryProvider = session.getDataDictionaryProvider();
 		if (dataDictionaryProvider != null) {
