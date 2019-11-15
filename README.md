@@ -53,4 +53,4 @@ Either:
 
 **I've created a new message, but how does it know where to send it?**
 
-The `quickfix.Message` must have the session it wishes to send to of the CDI event. Use the methods in `uk.dansiviter.fixws.Util` to assist with this.
+The `quickfix.Message` must have the session it wishes to send to of the CDI event. Use the methods in `uk.dansiviter.fixws.FixUtil` to assist with this.
