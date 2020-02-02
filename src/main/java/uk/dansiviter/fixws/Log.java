@@ -16,6 +16,7 @@
 package uk.dansiviter.fixws;
 
 import static org.jboss.logging.Logger.Level.DEBUG;
+import static org.jboss.logging.Logger.Level.ERROR;
 import static org.jboss.logging.Logger.Level.WARN;
 
 import java.io.IOException;
@@ -55,9 +56,13 @@ public interface Log extends BasicLogger {
 	@Message("On create. [%s]")
 	void onCreate(SessionID sessionId);
 
-	@LogMessage(level = DEBUG)
+	@LogMessage
 	@Message("On logon. [%s]")
 	void onLogon(SessionID sessionId);
+
+	@LogMessage
+	@Message("On logout. [%s]")
+	void onLogout(SessionID sessionId);
 
 	@LogMessage(level = DEBUG)
 	@Message("To admin. [id=%s,msg=%s]")
@@ -94,4 +99,16 @@ public interface Log extends BasicLogger {
 	@LogMessage(level = WARN)
 	@Message("Error! [%s]")
 	void onError(String id, @Cause Throwable t);
+
+	@LogMessage(level = WARN)
+	@Message("Disconnecting; received message for unknown session. [%s]")
+	void fixSessionNotFound(String msg);
+
+	@LogMessage(level = ERROR)
+	@Message("Unknown session ID during logon. [%s]")
+	void unknownSessionIdLogon(SessionID sessionId);
+
+	@LogMessage(level = WARN)
+	@Message("Ignoring non-logon message before session established. [%s]")
+	void ignoringLogon(quickfix.Message msg);
 }

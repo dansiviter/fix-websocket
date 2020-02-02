@@ -69,7 +69,7 @@ public class FixApplication implements Application {
 
 	@Override
 	public void onLogout(SessionID sessionId) {
-		this.log.onLogon(sessionId);
+		this.log.onLogout(sessionId);
 	}
 
 	@Override

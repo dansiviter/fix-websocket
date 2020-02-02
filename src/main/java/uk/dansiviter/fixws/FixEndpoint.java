@@ -106,7 +106,7 @@ public class FixEndpoint extends Endpoint {
                 }
             }
         } else {
-            log.errorf("Disconnecting; received message for unknown session: %s", msgStr);
+            log.fixSessionNotFound(msgStr);
             session.close();
         }
 	}
@@ -144,11 +144,11 @@ public class FixEndpoint extends Endpoint {
                         }
                     }
                 } else {
-                    log.errorf("Unknown session ID during logon: %s", sessionID);
+                    log.unknownSessionIdLogon(sessionID);
                     return;
                 }
             } else {
-                log.warnf("Ignoring non-logon message before session establishment: %s", message);
+                log.ignoringLogon(message);
                 session.close();
                 return;
             }

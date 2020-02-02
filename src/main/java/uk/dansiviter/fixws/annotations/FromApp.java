@@ -32,6 +32,7 @@ import javax.inject.Qualifier;
 @Retention(RUNTIME)
 @Target({ METHOD, FIELD, PARAMETER, TYPE })
 public @interface FromApp {
+	@SuppressWarnings("all")
 	public static final class Literal extends AnnotationLiteral<FromApp> implements FromApp {
 		private static final long serialVersionUID = 1L;
 		private static final Literal INSTANCE = new Literal();

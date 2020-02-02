@@ -33,8 +33,12 @@ import javax.inject.Qualifier;
 @Retention(RUNTIME)
 @Target({ METHOD, FIELD, PARAMETER, TYPE })
 public @interface MsgType {
+	/**
+	 * @return the message type.
+	 */
 	String value();
 
+	@SuppressWarnings("all")
 	public static final class Literal extends AnnotationLiteral<MsgType> implements MsgType {
 		private static final long serialVersionUID = 1L;
 

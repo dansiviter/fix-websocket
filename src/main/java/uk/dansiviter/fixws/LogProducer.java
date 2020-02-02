@@ -31,14 +31,14 @@ import quickfix.LogFactory;
 import quickfix.SessionID;
 
 /**
- * Produces {@link Logger} instances for injection.
+ * Produces {@link Log} instances for injection.
  *
  * @author Daniel Siviter
  * @since v1.0 [13 Nov 2019]
  */
 @ApplicationScoped
 public class LogProducer implements LogFactory {
-	private static final Map<String, Log> LOGS = new WeakHashMap<>(); // TODO WeakValueHashMap would be more pertinent
+	private static final Map<String, Log> LOGS = new WeakHashMap<>();
 
 	/**
 	 *
