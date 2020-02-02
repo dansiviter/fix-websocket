@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Daniel Siviter
+ * Copyright 2019-2020 Daniel Siviter
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -220,6 +220,7 @@ public class FixEndpoint extends Endpoint {
 		in.forEach(s -> out.add(s.toLowerCase().replaceAll("\\.", "")));
 		return out;
 	}
+
 
 	// --- Inner Classes ---
 
