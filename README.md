@@ -7,6 +7,28 @@ There are a number of limitations at the moment:
 * FIX specification version is fixed at the moment at 5.0. Both the WebSocket subprotocols and the Logon Handshake should permit different versions, but I just wanted to get this working,
 * More testing is required to see if older FIXT 1.1/5.0 protocols work as they are a single spec rather than split,
 
+## Usage ##
+
+Either annotated:
+
+	@ServerEndpoint(value = "/fix", subprotocols = "fix50")
+	public class MyFixEndpoint extends FixEndpoint { }
+
+...or via `javax.websocket.server.ServerApplicationConfig`:
+
+	public static class MyApplicationConfig implements ServerApplicationConfig {
+		@Override
+		public Set<ServerEndpointConfig> getEndpointConfigs(Set<Class<? extends Endpoint>> endpointClasses) {
+			return Set.of(FixEndpoint.config("/fix", List.of(FixVersions.FIX50)));
+		}
+
+		@Override
+		public Set<Class<?>> getAnnotatedEndpointClasses(Set<Class<?>> scanned) {
+			return emptySet();
+		}
+	}
+
+
 ## Receiving Messages ##
 
 A type-safe way:
