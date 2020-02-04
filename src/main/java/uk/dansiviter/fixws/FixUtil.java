@@ -17,7 +17,11 @@ package uk.dansiviter.fixws;
 
 import static quickfix.MessageUtils.getReverseSessionID;
 import static quickfix.MessageUtils.getSessionID;
+import static uk.dansiviter.fixws.Messages.messages;
 
+import javax.annotation.Nonnull;
+
+import quickfix.FieldNotFound;
 import quickfix.Message;
 import quickfix.Message.Header;
 import quickfix.SessionID;
@@ -33,14 +37,15 @@ import quickfix.field.TargetSubID;
  * @author Daniel Siviter
  * @since v1.0 [13 Nov 2019]
  */
-public enum FixUtil { ;
+public enum FixUtil {
+	;
 	/**
 	 *
 	 * @param message
 	 * @return
 	 * @see quickfix.MessageUtils#getSessionID(Message)
 	 */
-	public static SessionID sessionId(Message message) {
+	public static @Nonnull SessionID sessionId(@Nonnull Message message) {
 		return getSessionID(message);
 	}
 
@@ -50,7 +55,7 @@ public enum FixUtil { ;
 	 * @return
 	 * @see quickfix.MessageUtils#getReverseSessionID(Message)
 	 */
-	public static SessionID reverseSessionID(Message message) {
+	public static @Nonnull SessionID reverseSessionID(@Nonnull Message message) {
 		return getReverseSessionID(message);
 	}
 
@@ -59,11 +64,10 @@ public enum FixUtil { ;
 	 * @param sessionId
 	 * @return
 	 */
-	public static SessionID reverse(SessionID sessionId) {
-		return new SessionID(sessionId.getBeginString(),
-				sessionId.getTargetCompID(), sessionId.getTargetSubID(), sessionId.getTargetLocationID(),
-				sessionId.getSenderCompID(), sessionId.getSenderSubID(), sessionId.getSenderLocationID(),
-				null);
+	public static @Nonnull SessionID reverse(@Nonnull SessionID sessionId) {
+		return new SessionID(sessionId.getBeginString(), sessionId.getTargetCompID(), sessionId.getTargetSubID(),
+				sessionId.getTargetLocationID(), sessionId.getSenderCompID(), sessionId.getSenderSubID(),
+				sessionId.getSenderLocationID(), null);
 	}
 
 	/**
@@ -74,14 +78,14 @@ public enum FixUtil { ;
 	 * @return
 	 * @see Message#setSessionID(SessionID)
 	 */
-	public static <M extends Message> M set(SessionID sessionId, M message) {
+	public static @Nonnull <M extends Message> M set(@Nonnull SessionID sessionId, @Nonnull M message) {
 		final Header header = message.getHeader();
-        header.setString(BeginString.FIELD, sessionId.getBeginString());
-        header.setString(SenderCompID.FIELD, sessionId.getSenderCompID());
-        optionallySetID(header, SenderSubID.FIELD, sessionId.getSenderSubID());
-        optionallySetID(header, SenderLocationID.FIELD, sessionId.getSenderLocationID());
-        header.setString(TargetCompID.FIELD, sessionId.getTargetCompID());
-        optionallySetID(header, TargetSubID.FIELD, sessionId.getTargetSubID());
+		header.setString(BeginString.FIELD, sessionId.getBeginString());
+		header.setString(SenderCompID.FIELD, sessionId.getSenderCompID());
+		optionallySetID(header, SenderSubID.FIELD, sessionId.getSenderSubID());
+		optionallySetID(header, SenderLocationID.FIELD, sessionId.getSenderLocationID());
+		header.setString(TargetCompID.FIELD, sessionId.getTargetCompID());
+		optionallySetID(header, TargetSubID.FIELD, sessionId.getTargetSubID());
 		optionallySetID(header, TargetLocationID.FIELD, sessionId.getTargetLocationID());
 		return message;
 	}
@@ -93,13 +97,26 @@ public enum FixUtil { ;
 	 * @param message
 	 * @return
 	 */
-	public static <M extends Message> M setReverse(SessionID sessionId, M message) {
+	public static <M extends Message> M setReverse(@Nonnull SessionID sessionId, @Nonnull M message) {
 		return set(reverse(sessionId), message);
 	}
 
-    private static void optionallySetID(Header header, int field, String value) {
-        if (!value.equals(SessionID.NOT_SET)) {
-            header.setString(field, value);
-        }
-    }
+	private static void optionallySetID(@Nonnull Header header, int field, @Nonnull String value) {
+		if (!value.equals(SessionID.NOT_SET)) {
+			header.setString(field, value);
+		}
+	}
+
+	/**
+	 *
+	 * @param msg
+	 * @return
+	 */
+	public static @Nonnull String msgType(@Nonnull Message msg) {
+		try {
+			return msg.getHeader().getString(quickfix.field.MsgType.FIELD);
+		} catch (FieldNotFound e) {
+			throw messages().msgTypeNotFound(e);
+		}
+	}
 }

@@ -41,7 +41,6 @@ import quickfix.SessionID;
 import quickfix.SessionNotFound;
 import quickfix.UnsupportedMessageType;
 import quickfix.field.ApplVerID;
-import quickfix.field.MsgType;
 import uk.dansiviter.fixws.annotations.FromApp;
 import uk.dansiviter.fixws.annotations.ToApp;
 
@@ -56,6 +55,9 @@ public class FixApplication implements Application {
 	@Inject
 	@FromApp
 	private Event<Message> messageEvent;
+
+	@Inject
+	private Metrics metrics;
 
 	@Override
 	public void onCreate(SessionID sessionId) {
@@ -85,6 +87,7 @@ public class FixApplication implements Application {
 
 	@Override
 	public void toApp(Message message, SessionID sessionId) throws DoNotSend {
+		this.metrics.on(message, sessionId, false);
 		this.log.toApp(sessionId, message);
 	}
 
@@ -93,8 +96,7 @@ public class FixApplication implements Application {
 			throws FieldNotFound, IncorrectDataFormat, IncorrectTagValue, UnsupportedMessageType {
 		this.log.fromApp(sessionId, message);
 
-		final String msgType = message.getHeader().getString(MsgType.FIELD);
-		final Event<Message> evt = this.messageEvent.select(msgType(msgType));
+		final Event<Message> evt = this.messageEvent.select(msgType(message));
 		evt.fire(message);
 		evt.fireAsync(message);
 	}

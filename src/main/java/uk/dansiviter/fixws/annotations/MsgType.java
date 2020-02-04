@@ -15,14 +15,20 @@
  */
 package uk.dansiviter.fixws.annotations;
 
-import static java.lang.annotation.RetentionPolicy.*;
-import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
+
+import quickfix.Message;
+import uk.dansiviter.fixws.FixUtil;
 
 /**
  * @author Daniel Siviter
@@ -53,12 +59,16 @@ public @interface MsgType {
 			return value;
 		}
 
-		public static MsgType msgType(MsgType value) {
-			return msgType(value.value());
+		public static MsgType msgType(quickfix.field.MsgType value) {
+			return msgType(value.getValue());
 		}
 
 		public static MsgType msgType(String value) {
 			return new Literal(value);
+		}
+
+		public static MsgType msgType(Message msg) {
+			return msgType(FixUtil.msgType(msg));
 		}
 	}
 }

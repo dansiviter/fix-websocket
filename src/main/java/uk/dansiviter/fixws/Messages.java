@@ -15,9 +15,11 @@
  */
 package uk.dansiviter.fixws;
 
+import org.jboss.logging.annotations.Cause;
 import org.jboss.logging.annotations.Message;
 import org.jboss.logging.annotations.MessageBundle;
 
+import quickfix.FieldNotFound;
 import quickfix.SessionID;
 
 @MessageBundle(projectCode = "FIXWS")
@@ -25,7 +27,10 @@ public interface Messages {
 	Messages INSTANCE = org.jboss.logging.Messages.getBundle(Messages.class);
 
 	@Message(id = 1, value = "Session '%s' not found!")
-    IllegalStateException sessionNotFound(SessionID sessionID);
+	IllegalStateException sessionNotFound(SessionID sessionID);
+
+	@Message(id = 2, value = "'msgType' Field not found!")
+	IllegalStateException msgTypeNotFound(@Cause FieldNotFound cause);
 
 	public static Messages messages() {
 		return INSTANCE;
