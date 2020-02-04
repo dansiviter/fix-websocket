@@ -55,7 +55,6 @@ public class FixApplication implements Application {
 	@Inject
 	@FromApp
 	private Event<Message> messageEvent;
-
 	@Inject
 	private Metrics metrics;
 
@@ -94,6 +93,7 @@ public class FixApplication implements Application {
 	@Override
 	public void fromApp(Message message, SessionID sessionId)
 			throws FieldNotFound, IncorrectDataFormat, IncorrectTagValue, UnsupportedMessageType {
+		this.metrics.on(message, sessionId, true);
 		this.log.fromApp(sessionId, message);
 
 		final Event<Message> evt = this.messageEvent.select(msgType(message));
