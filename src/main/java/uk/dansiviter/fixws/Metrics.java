@@ -39,13 +39,13 @@ import quickfix.SessionID;
 @ApplicationScoped
 public class Metrics {
 	private static final Metadata METADATA = Metadata.builder()
-			.withName("fix/message_count")
+			.withName("fix/message.count")
 			.withDisplayName("FIX Message Count")
 			.withDescription("The count of inbound and outbound messages.")
 			.withType(COUNTER)
 			.build();
-	private static final Tag INBOUND = new Tag("inbound", "true");
-	private static final Tag OUTBOUND = new Tag("inbound", "false");
+	private static final Tag CLIENT = new Tag("kind", "client");
+	private static final Tag SERVER = new Tag("kind", "server");
 	private static final Map<String, Tag> MSG_TYPE = new ConcurrentHashMap<>();
 
 	@Inject
@@ -56,6 +56,6 @@ public class Metrics {
 			return;
 		}
 		final Tag msgType = MSG_TYPE.computeIfAbsent(msgType(msg), k -> new Tag("msgType", k));
-		this.registry.get().counter(METADATA, inbound ? INBOUND : OUTBOUND, msgType).inc();
+		this.registry.get().counter(METADATA, inbound ? CLIENT : SERVER, msgType).inc();
 	}
 }
