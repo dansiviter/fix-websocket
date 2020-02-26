@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.Nonnull;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -53,7 +54,7 @@ public class Metrics {
 	@Inject
 	private Instance<MetricRegistry> registry;
 
-	void on(Message msg, SessionID id, boolean inbound) {
+	void on(@Nonnull Message msg, @Nonnull SessionID id, boolean inbound) {
 		if (!this.registry.isResolvable()) {
 			return;
 		}

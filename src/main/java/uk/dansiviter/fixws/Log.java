@@ -35,50 +35,26 @@ import quickfix.SessionID;
  * @since v1.0 [13 Nov 2019]
  */
 @MessageLogger(projectCode = "FIXWS")
-public interface Log extends BasicLogger {
-	@LogMessage(level = DEBUG)
-	@Message("Incomming. [%s]")
+public interface Log extends BasicLogger, quickfix.Log {
+	@LogMessage
+	@Message("Incoming. [%s]")
+	@Override
 	void onIncoming(String message);
 
-	@LogMessage(level = DEBUG)
+	@LogMessage
 	@Message("Outgoing. [%s]")
+	@Override
 	void onOutgoing(String message);
 
-	@LogMessage(level = DEBUG)
+	@LogMessage
 	@Message("Event. [%s]")
+	@Override
 	void onEvent(String text);
 
 	@LogMessage(level = WARN)
 	@Message("Error event. [%s]")
+	@Override
     void onErrorEvent(String text);
-
-	@LogMessage(level = DEBUG)
-	@Message("On create. [%s]")
-	void onCreate(SessionID sessionId);
-
-	@LogMessage
-	@Message("On logon. [%s]")
-	void onLogon(SessionID sessionId);
-
-	@LogMessage
-	@Message("On logout. [%s]")
-	void onLogout(SessionID sessionId);
-
-	@LogMessage(level = DEBUG)
-	@Message("To admin. [id=%s,msg=%s]")
-	void toAdmin(SessionID sessionId, quickfix.Message message);
-
-	@LogMessage(level = DEBUG)
-	@Message("From admin. [id=%s,msg=%s]")
-	void fromAdmin(SessionID sessionId, quickfix.Message message);
-
-	@LogMessage(level = DEBUG)
-	@Message("To app. [id=%s,msg=%s]")
-	void toApp(SessionID sessionId, quickfix.Message message);
-
-	@LogMessage(level = DEBUG)
-	@Message("From app. [id=%s,msg=%s]")
-	void fromApp(SessionID sessionId, quickfix.Message message);
 
 	@LogMessage(level = WARN)
 	@Message("Unable to send! [%s]")
@@ -111,4 +87,9 @@ public interface Log extends BasicLogger {
 	@LogMessage(level = WARN)
 	@Message("Ignoring non-logon message before session established. [%s]")
 	void ignoringLogon(quickfix.Message msg);
+
+	@Override
+	default void clear() {
+		// required for implementing quickfix.Log
+	}
 }

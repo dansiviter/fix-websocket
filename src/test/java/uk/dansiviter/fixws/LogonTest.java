@@ -40,6 +40,7 @@ import org.hamcrest.Matchers;
 import org.jboss.weld.junit5.EnableWeld;
 import org.jboss.weld.junit5.WeldInitiator;
 import org.jboss.weld.junit5.WeldSetup;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import quickfix.FixVersions;
@@ -72,9 +73,15 @@ public class LogonTest extends AbstractTest {
 		FixApplication.class,
 		SessionSettingsProducer.class,
 		MessageStoreFactoryProducer.class,
-		TestHandler.class);
+		TestHandler.class,
+		Metrics.class);
 
 	private SynchronousQueue<Message> queue = new SynchronousQueue<Message>();
+
+	@BeforeAll
+	public static void beforeAll() {
+		System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tTT%1$tF%1$tz %3$s%n%4$s: %5$s%n");
+	}
 
 	@Test
 	public void test() throws DeploymentException, IOException, InterruptedException, InvalidMessage, EncodeException {

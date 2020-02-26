@@ -71,46 +71,6 @@ public class LogProducer implements LogFactory {
 
 	@Override
 	public quickfix.Log create(SessionID sessionId) {
-		return new LogImpl(log(sessionId.toString()));
-	}
-
-
-	// --- Inner Classes ---
-
-	/**
-	 * @author Daniel Siviter
-	 * @since v1.0 [13 Nov 2019]
-	 */
-	private static class LogImpl implements quickfix.Log {
-		private final Log log;
-
-		LogImpl(Log log) {
-			this.log = log;
-		}
-
-		@Override
-		public void onIncoming(String message) {
-			this.log.onEvent(message);
-		}
-
-		@Override
-		public void onOutgoing(String message) {
-			this.log.onOutgoing(message);
-		}
-
-		@Override
-		public void onEvent(String text) {
-			this.log.onEvent(text);
-		}
-
-		@Override
-		public void onErrorEvent(String text) {
-			this.log.onErrorEvent(text);
-		}
-
-		@Override
-		public void clear() {
-			// nothing to see here!
-		}
+		return log("quickfix.Log:" + sessionId.toString());
 	}
 }

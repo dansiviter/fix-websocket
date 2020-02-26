@@ -26,7 +26,6 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.event.ObservesAsync;
 import javax.inject.Inject;
 
-import quickfix.Application;
 import quickfix.DataDictionaryProvider;
 import quickfix.DoNotSend;
 import quickfix.FieldNotFound;
@@ -35,7 +34,6 @@ import quickfix.IncorrectDataFormat;
 import quickfix.IncorrectTagValue;
 import quickfix.Message;
 import quickfix.MessageUtils;
-import quickfix.RejectLogon;
 import quickfix.Session;
 import quickfix.SessionID;
 import quickfix.SessionNotFound;
@@ -49,9 +47,7 @@ import uk.dansiviter.fixws.annotations.ToApp;
  * @since v1.0 [13 Nov 2019]
  */
 @ApplicationScoped
-public class FixApplication implements Application {
-	@Inject
-	private Log log;
+public class FixApplication extends ApplicationAdapter {
 	@Inject
 	@FromApp
 	private Event<Message> messageEvent;
@@ -59,42 +55,14 @@ public class FixApplication implements Application {
 	private Metrics metrics;
 
 	@Override
-	public void onCreate(SessionID sessionId) {
-		this.log.onCreate(sessionId);
-	}
-
-	@Override
-	public void onLogon(SessionID sessionId) {
-		this.log.onLogon(sessionId);
-	}
-
-	@Override
-	public void onLogout(SessionID sessionId) {
-		this.log.onLogout(sessionId);
-	}
-
-	@Override
-	public void toAdmin(Message message, SessionID sessionId) {
-		this.log.toAdmin(sessionId, message);
-	}
-
-	@Override
-	public void fromAdmin(Message message, SessionID sessionId)
-			throws FieldNotFound, IncorrectDataFormat, IncorrectTagValue, RejectLogon {
-		this.log.fromAdmin(sessionId, message);
-	}
-
-	@Override
 	public void toApp(Message message, SessionID sessionId) throws DoNotSend {
 		this.metrics.on(message, sessionId, false);
-		this.log.toApp(sessionId, message);
 	}
 
 	@Override
 	public void fromApp(Message message, SessionID sessionId)
 			throws FieldNotFound, IncorrectDataFormat, IncorrectTagValue, UnsupportedMessageType {
 		this.metrics.on(message, sessionId, true);
-		this.log.fromApp(sessionId, message);
 
 		final Event<Message> evt = this.messageEvent.select(msgType(message));
 		evt.fire(message);
