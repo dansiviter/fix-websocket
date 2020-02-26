@@ -15,7 +15,6 @@
  */
 package uk.dansiviter.fixws;
 
-import static org.jboss.logging.Logger.Level.DEBUG;
 import static org.jboss.logging.Logger.Level.ERROR;
 import static org.jboss.logging.Logger.Level.WARN;
 

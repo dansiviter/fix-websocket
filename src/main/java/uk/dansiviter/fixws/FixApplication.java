@@ -26,6 +26,7 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.event.ObservesAsync;
 import javax.inject.Inject;
 
+import quickfix.ApplicationAdapter;
 import quickfix.DataDictionaryProvider;
 import quickfix.DoNotSend;
 import quickfix.FieldNotFound;
