@@ -19,6 +19,7 @@ import static org.eclipse.microprofile.metrics.MetricType.COUNTER;
 import static uk.dansiviter.fixws.FixUtil.msgType;
 
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -46,6 +47,7 @@ public class Metrics {
 			.build();
 	private static final Tag CLIENT = new Tag("kind", "client");
 	private static final Tag SERVER = new Tag("kind", "server");
+	private static final Map<SessionID, Tag> SESSION_ID = new WeakHashMap<>();
 	private static final Map<String, Tag> MSG_TYPE = new ConcurrentHashMap<>();
 
 	@Inject
@@ -55,7 +57,8 @@ public class Metrics {
 		if (!this.registry.isResolvable()) {
 			return;
 		}
+		final Tag sessionId = SESSION_ID.computeIfAbsent(id, k -> new Tag("sessionId", id.toString()));
 		final Tag msgType = MSG_TYPE.computeIfAbsent(msgType(msg), k -> new Tag("msgType", k));
-		this.registry.get().counter(METADATA, inbound ? CLIENT : SERVER, msgType).inc();
+		this.registry.get().counter(METADATA, sessionId, inbound ? CLIENT : SERVER, msgType).inc();
 	}
 }

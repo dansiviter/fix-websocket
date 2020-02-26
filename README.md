@@ -71,6 +71,12 @@ Either:
 	beanManager.fireEvent(message, ToApp.Literal.toApp());
 
 
+## Metrics ##
+
+| Name                | Type    | Unit | Labels                   |
+|---------------------|---------|------|--------------------------|
+| `fix/message.count` | Counter | 1    | sessionId, msgType, kind |
+
 ## Frequently Asked Questions ##
 
 **I've created a new message, but how does it know where to send it?**
