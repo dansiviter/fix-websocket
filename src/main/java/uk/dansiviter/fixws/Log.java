@@ -15,6 +15,7 @@
  */
 package uk.dansiviter.fixws;
 
+import static org.jboss.logging.Logger.Level.DEBUG;
 import static org.jboss.logging.Logger.Level.ERROR;
 import static org.jboss.logging.Logger.Level.WARN;
 
@@ -34,26 +35,22 @@ import quickfix.SessionID;
  * @since v1.0 [13 Nov 2019]
  */
 @MessageLogger(projectCode = "FIXWS")
-public interface Log extends BasicLogger, quickfix.Log {
-	@LogMessage
+public interface Log extends BasicLogger {
+	@LogMessage(level = DEBUG)
 	@Message("Incoming. [%s]")
-	@Override
 	void onIncoming(String message);
 
-	@LogMessage
+	@LogMessage(level = DEBUG)
 	@Message("Outgoing. [%s]")
-	@Override
 	void onOutgoing(String message);
 
 	@LogMessage
 	@Message("Event. [%s]")
-	@Override
 	void onEvent(String text);
 
 	@LogMessage(level = WARN)
 	@Message("Error event. [%s]")
-	@Override
-    void onErrorEvent(String text);
+	void onErrorEvent(String text);
 
 	@LogMessage(level = WARN)
 	@Message("Unable to send! [%s]")
@@ -72,8 +69,8 @@ public interface Log extends BasicLogger, quickfix.Log {
 	void onClose(String id, int closeCode, String reasonPhrase);
 
 	@LogMessage(level = WARN)
-	@Message("Error! [%s]")
-	void onError(String id, @Cause Throwable t);
+	@Message("Error! [id=%s]")
+	void onError(String id, @Cause Throwable cause);
 
 	@LogMessage(level = WARN)
 	@Message("Disconnecting; received message for unknown session. [%s]")
@@ -86,9 +83,4 @@ public interface Log extends BasicLogger, quickfix.Log {
 	@LogMessage(level = WARN)
 	@Message("Ignoring non-logon message before session established. [%s]")
 	void ignoringLogon(quickfix.Message msg);
-
-	@Override
-	default void clear() {
-		// required for implementing quickfix.Log
-	}
 }

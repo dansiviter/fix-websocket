@@ -17,6 +17,8 @@ package uk.dansiviter.fixws;
 
 import static java.util.Collections.emptySet;
 
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -38,6 +40,7 @@ import org.glassfish.tyrus.test.tools.TestContainer;
 import org.jboss.weld.junit5.EnableWeld;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Timeout;
 
 import quickfix.DefaultMessageFactory;
 import quickfix.FixVersions;
@@ -57,12 +60,16 @@ import quickfix.field.TargetCompID;
  * @since v1.0 [13 Nov 2019]
  */
 @EnableWeld
+@Timeout(10)
 public abstract class AbstractTest extends TestContainer {
 	protected final AtomicInteger msgSeqNum = new AtomicInteger();
 	protected Server server;
 
 	@BeforeEach
-	public void before() throws DeploymentException {
+	public void before() throws DeploymentException, IOException {
+		try (ServerSocket s = new ServerSocket(0)) {
+			setDefaultPort(s.getLocalPort());  // TestContainer doesn't update port for client
+		}
 		this.server = startServer(TestConfig.class);
 	}
 
