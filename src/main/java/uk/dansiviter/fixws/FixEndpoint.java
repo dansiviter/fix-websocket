@@ -15,6 +15,7 @@
  */
 package uk.dansiviter.fixws;
 
+import static javax.enterprise.inject.spi.CDI.current;
 import static quickfix.MessageUtils.getReverseSessionID;
 import static quickfix.MessageUtils.isLogon;
 import static quickfix.MessageUtils.parse;
@@ -25,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.inject.Inject;
 import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
@@ -55,13 +55,15 @@ import quickfix.mina.SessionConnector;
  * @see quickfix.mina.acceptor.AcceptorIoHandler
  */
 public class FixEndpoint extends Endpoint {
-	@Inject
-	private Log log;
-	@Inject
+	private final Log log = LogProducer.log(FixEndpoint.class);
+
 	private SessionProvider sessionProvider;
 
 	@Override
 	public void onOpen(Session session, EndpointConfig config) {
+		// non-annotated Endpoints do not get injection!
+		this.sessionProvider = current().select(SessionProvider.class).get();
+
 		this.log.onOpen(session.getId());
 		session.addMessageHandler(String.class, new Whole<String>() {
 			@Override

@@ -15,14 +15,13 @@
  */
 package uk.dansiviter.fixws;
 
-import static uk.dansiviter.fixws.FixUtil.setReverse;
-import static uk.dansiviter.fixws.FixUtil.sessionId;
-
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertThat;
+import static uk.dansiviter.fixws.FixUtil.sessionId;
+import static uk.dansiviter.fixws.FixUtil.setReverse;
 
 import java.io.IOException;
 import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.TimeUnit;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
@@ -67,20 +66,20 @@ import uk.dansiviter.fixws.annotations.ToApp;
 public class LogonTest extends AbstractTest {
 	@WeldSetup
 	public WeldInitiator weld = WeldInitiator.of(
-		LogProducer.class,
-		SessionProviderProducer.class,
-		SessionFactoryProducer.class,
-		FixApplication.class,
-		SessionSettingsProducer.class,
-		MessageStoreFactoryProducer.class,
-		TestHandler.class,
-		Metrics.class);
+			LogProducer.class,
+			SessionProviderProducer.class,
+			SessionFactoryProducer.class,
+			FixApplication.class,
+			SessionSettingsProducer.class,
+			MessageStoreFactoryProducer.class,
+			TestHandler.class,
+			Metrics.class);
 
 	private SynchronousQueue<Message> queue = new SynchronousQueue<Message>();
 
 	@BeforeAll
 	public static void beforeAll() {
-		System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tTT%1$tF%1$tz %3$s%n%4$s: %5$s%n");
+		System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tTT%1$tF%1$tz %3$s%n%4$s: %5$s%6$s%n");
 	}
 
 	@Test
@@ -109,11 +108,11 @@ public class LogonTest extends AbstractTest {
 			}
 		}, clientConfig(FixVersions.FIX50), getURI("/fix"));
 
-		final Message logon = queue.poll(5, TimeUnit.MINUTES);
+		final Message logon = queue.poll(5, SECONDS);
 		assertThat(logon, Matchers.isA(Logon.class));
 		session.getBasicRemote().sendObject(defaults(news("Howdy", "foo")));
 
-		final Message snapshot = queue.poll(5, TimeUnit.MINUTES);
+		final Message snapshot = queue.poll(5, SECONDS);
 		assertThat(snapshot, Matchers.isA(News.class));
 
 		session.close();

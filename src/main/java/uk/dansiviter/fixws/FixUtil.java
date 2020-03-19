@@ -19,12 +19,22 @@ import static quickfix.MessageUtils.getReverseSessionID;
 import static quickfix.MessageUtils.getSessionID;
 import static uk.dansiviter.fixws.Messages.messages;
 
-import javax.annotation.Nonnull;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Properties;
 
+import javax.annotation.Nonnull;
+import javax.el.MethodNotFoundException;
+
+import quickfix.ConfigError;
 import quickfix.FieldNotFound;
 import quickfix.Message;
 import quickfix.Message.Header;
 import quickfix.SessionID;
+import quickfix.SessionSettings;
 import quickfix.field.BeginString;
 import quickfix.field.SenderCompID;
 import quickfix.field.SenderLocationID;
@@ -67,7 +77,7 @@ public enum FixUtil {
 	public static @Nonnull SessionID reverse(@Nonnull SessionID sessionId) {
 		return new SessionID(sessionId.getBeginString(), sessionId.getTargetCompID(), sessionId.getTargetSubID(),
 				sessionId.getTargetLocationID(), sessionId.getSenderCompID(), sessionId.getSenderSubID(),
-				sessionId.getSenderLocationID(), null);
+				sessionId.getSenderLocationID(), sessionId.getSessionQualifier());
 	}
 
 	/**
@@ -118,5 +128,27 @@ public enum FixUtil {
 		} catch (FieldNotFound e) {
 			throw messages().msgTypeNotFound(e);
 		}
+	}
+
+	public static SessionSettings settings(InputStream is, Properties variables) throws ConfigError, IOException {
+		SessionSettings settings = new SessionSettings();
+		settings.setVariableValues(variables);
+		try {
+			Method method = SessionSettings.class.getDeclaredMethod("load", InputStream.class);
+			method.setAccessible(true);
+			method.invoke(settings, is);
+			return settings;
+		} catch (MethodNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	public static void main(String[] args) throws ConfigError, IOException {
+		String str = "[SESSION]\nCompTargetID=${target}\nFoo=${myFoo}";
+		Properties variables = new Properties();
+		variables.put("target", "acme");
+
+		SessionSettings settings = settings(new ByteArrayInputStream(str.getBytes()), variables);
+		System.out.println(settings);
 	}
 }

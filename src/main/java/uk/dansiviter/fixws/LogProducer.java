@@ -71,6 +71,6 @@ public class LogProducer implements LogFactory {
 
 	@Override
 	public quickfix.Log create(SessionID sessionId) {
-		return log("quickfix.Log:" + sessionId.toString());
+		return new FixLog(log("quickfix.Log:" + sessionId.toString()));
 	}
 }

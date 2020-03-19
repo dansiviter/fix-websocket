@@ -15,32 +15,40 @@
  */
 package uk.dansiviter.fixws;
 
-import static javax.enterprise.inject.spi.CDI.current;
-
-import org.glassfish.tyrus.core.ComponentProvider;
-
 /**
+ *
  * @author Daniel Siviter
  * @since v1.0 [13 Nov 2019]
  */
-public class CdiComponentProvider extends ComponentProvider {
-	@Override
-	public boolean isApplicable(Class<?> c) {
-		return !current().getBeanManager().getBeans(c).isEmpty();
+public class FixLog implements quickfix.Log {
+	private final Log log;
+
+	FixLog(Log log) {
+		this.log = log;
 	}
 
 	@Override
-	public <T> Object create(Class<T> c) {
-		return current().select(c).get();
+	public void onIncoming(String message) {
+		this.log.onIncoming(message);
 	}
 
 	@Override
-	public boolean destroy(Object o) {
-		try {
-			current().destroy(o);
-			return true;
-		} catch (UnsupportedOperationException | IllegalStateException e) {
-			return false;
-		}
+	public void onOutgoing(String message) {
+		this.log.onOutgoing(message);
+	}
+
+	@Override
+	public void onEvent(String text) {
+		this.log.onEvent(text);
+	}
+
+	@Override
+	public void onErrorEvent(String text) {
+		this.log.onErrorEvent(text);
+	}
+
+	@Override
+	public void clear() {
+		// NOOP
 	}
 }
