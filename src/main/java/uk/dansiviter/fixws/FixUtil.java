@@ -17,7 +17,7 @@ package uk.dansiviter.fixws;
 
 import static quickfix.MessageUtils.getReverseSessionID;
 import static quickfix.MessageUtils.getSessionID;
-import static uk.dansiviter.fixws.Messages.messages;
+import static uk.dansiviter.fixws.ExceptionFactory.msgTypeNotFound;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -126,7 +126,7 @@ public enum FixUtil {
 		try {
 			return msg.getHeader().getString(quickfix.field.MsgType.FIELD);
 		} catch (FieldNotFound e) {
-			throw messages().msgTypeNotFound(e);
+			throw msgTypeNotFound(e);
 		}
 	}
 

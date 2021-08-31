@@ -20,6 +20,7 @@ import static java.util.Collections.emptySet;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -46,8 +47,8 @@ import quickfix.DefaultMessageFactory;
 import quickfix.FixVersions;
 import quickfix.InvalidMessage;
 import quickfix.Message;
-import quickfix.MessageFactory;
 import quickfix.Message.Header;
+import quickfix.MessageFactory;
 import quickfix.MessageUtils;
 import quickfix.field.ApplVerID;
 import quickfix.field.MsgSeqNum;
@@ -101,7 +102,7 @@ public abstract class AbstractTest extends TestContainer {
 	protected <M extends Message> M defaults(M message, String senderCompId, String targetCompId) {
 		final Header header = message.getHeader();
 		header.setField(new MsgSeqNum(this.msgSeqNum.incrementAndGet()));
-		header.setField(new SendingTime(LocalDateTime.now()));
+		header.setField(new SendingTime(LocalDateTime.now(ZoneOffset.UTC)));
 		header.setField(new SenderCompID(senderCompId));
 		header.setField(new TargetCompID(targetCompId));
 		header.setField(new ApplVerID(ApplVerID.FIX50));

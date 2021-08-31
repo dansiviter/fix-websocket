@@ -17,7 +17,7 @@ package uk.dansiviter.fixws;
 
 import static quickfix.LogUtil.logThrowable;
 import static quickfix.MessageUtils.toApplVerID;
-import static uk.dansiviter.fixws.Messages.messages;
+import static uk.dansiviter.fixws.ExceptionFactory.sessionNotFound;
 import static uk.dansiviter.fixws.annotations.MsgType.Literal.msgType;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -86,7 +86,7 @@ public class FixApplication extends ApplicationAdapter {
 		final SessionID sessionId = MessageUtils.getSessionID(message);
 		final quickfix.Session session = quickfix.Session.lookupSession(sessionId);
 		if (session == null) {
-			throw messages().sessionNotFound(sessionId);
+			throw sessionNotFound(sessionId);
 		}
 
 		if (sessionId.isFIXT()) {  // required for correct deserialisation on client app.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 Daniel Siviter
+ * Copyright 2019-2021 Daniel Siviter
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,40 +15,15 @@
  */
 package uk.dansiviter.fixws;
 
-/**
- *
- * @author Daniel Siviter
- * @since v1.0 [13 Nov 2019]
- */
-public class FixLog implements quickfix.Log {
-	private final Log log;
+import quickfix.FieldNotFound;
+import quickfix.SessionID;
 
-	FixLog(Log log) {
-		this.log = log;
+public enum ExceptionFactory { ;
+	public static IllegalStateException sessionNotFound(SessionID sessionId) {
+		return new IllegalStateException(String.format("Session '%s' not found!", sessionId));
 	}
 
-	@Override
-	public void onIncoming(String message) {
-		this.log.onIncoming(message);
-	}
-
-	@Override
-	public void onOutgoing(String message) {
-		this.log.onOutgoing(message);
-	}
-
-	@Override
-	public void onEvent(String text) {
-		this.log.onEvent(text);
-	}
-
-	@Override
-	public void onErrorEvent(String text) {
-		this.log.onErrorEvent(text);
-	}
-
-	@Override
-	public void clear() {
-		// NOOP
+	public static IllegalStateException msgTypeNotFound(FieldNotFound cause) {
+		return new IllegalStateException("'msgType' Field not found!", cause);
 	}
 }

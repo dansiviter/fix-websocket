@@ -16,12 +16,13 @@
 package uk.dansiviter.fixws;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.dansiviter.fixws.FixUtil.sessionId;
 import static uk.dansiviter.fixws.FixUtil.setReverse;
 
 import java.io.IOException;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.LinkedTransferQueue;
+import java.util.concurrent.TransferQueue;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
@@ -34,7 +35,6 @@ import javax.websocket.EndpointConfig;
 import javax.websocket.MessageHandler.Whole;
 import javax.websocket.Session;
 
-import org.glassfish.tyrus.client.ClientManager;
 import org.hamcrest.Matchers;
 import org.jboss.weld.junit5.EnableWeld;
 import org.jboss.weld.junit5.WeldInitiator;
@@ -57,6 +57,7 @@ import quickfix.fix50.News.NoLinesOfText;
 import quickfix.fixt11.Logon;
 import uk.dansiviter.fixws.annotations.FromApp;
 import uk.dansiviter.fixws.annotations.ToApp;
+import uk.dansiviter.juli.cdi.LogExtension;
 
 /**
  * @author Daniel Siviter
@@ -66,16 +67,17 @@ import uk.dansiviter.fixws.annotations.ToApp;
 public class LogonTest extends AbstractTest {
 	@WeldSetup
 	public WeldInitiator weld = WeldInitiator.of(
-			LogProducer.class,
-			SessionProviderProducer.class,
-			SessionFactoryProducer.class,
-			FixApplication.class,
-			SessionSettingsProducer.class,
-			MessageStoreFactoryProducer.class,
-			TestHandler.class,
-			Metrics.class);
+		LogExtension.class,
+		LogFactoryProducer.class,
+		SessionProviderProducer.class,
+		SessionFactoryProducer.class,
+		FixApplication.class,
+		SessionSettingsProducer.class,
+		MessageStoreFactoryProducer.class,
+		TestHandler.class,
+		Metrics.class);
 
-	private SynchronousQueue<Message> queue = new SynchronousQueue<Message>();
+	private final TransferQueue<Message> queue = new LinkedTransferQueue<Message>();
 
 	@BeforeAll
 	public static void beforeAll() {
@@ -84,9 +86,9 @@ public class LogonTest extends AbstractTest {
 
 	@Test
 	public void test() throws DeploymentException, IOException, InterruptedException, InvalidMessage, EncodeException {
-		final ClientManager client = createClient();
+		var client = createClient();
 
-		final Session session = client.connectToServer(new Endpoint() {
+		var session = client.connectToServer(new Endpoint() {
 			@Override
 			public void onOpen(Session session, EndpointConfig config) {
 				try {
@@ -108,11 +110,11 @@ public class LogonTest extends AbstractTest {
 			}
 		}, clientConfig(FixVersions.FIX50), getURI("/fix"));
 
-		final Message logon = queue.poll(5, SECONDS);
+		var logon = queue.poll(5, SECONDS);
 		assertThat(logon, Matchers.isA(Logon.class));
 		session.getBasicRemote().sendObject(defaults(news("Howdy", "foo")));
 
-		final Message snapshot = queue.poll(5, SECONDS);
+		var snapshot = queue.poll(5, SECONDS);
 		assertThat(snapshot, Matchers.isA(News.class));
 
 		session.close();

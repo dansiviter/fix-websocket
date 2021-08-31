@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 Daniel Siviter
+ * Copyright 2019-2021 Daniel Siviter
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,72 +15,54 @@
  */
 package uk.dansiviter.fixws;
 
-import static org.jboss.logging.Logger.Level.DEBUG;
-import static org.jboss.logging.Logger.Level.ERROR;
-import static org.jboss.logging.Logger.Level.WARN;
+import static uk.dansiviter.juli.annotations.Message.Level.DEBUG;
+import static uk.dansiviter.juli.annotations.Message.Level.WARN;
 
 import java.io.IOException;
 
-import org.jboss.logging.BasicLogger;
-import org.jboss.logging.annotations.Cause;
-import org.jboss.logging.annotations.LogMessage;
-import org.jboss.logging.annotations.Message;
-import org.jboss.logging.annotations.MessageLogger;
-
 import quickfix.SessionID;
+import uk.dansiviter.juli.annotations.Message;
 
 /**
  *
  * @author Daniel Siviter
  * @since v1.0 [13 Nov 2019]
  */
-@MessageLogger(projectCode = "FIXWS")
-public interface Log extends BasicLogger {
-	@LogMessage(level = DEBUG)
-	@Message("Incoming. [%s]")
+@uk.dansiviter.juli.annotations.Log
+public interface Log {
+	@Message(value = "Incoming. [{0}]", level = DEBUG)
 	void onIncoming(String message);
 
-	@LogMessage(level = DEBUG)
-	@Message("Outgoing. [%s]")
+	@Message(value = "Outgoing. [{0}]", level = DEBUG)
 	void onOutgoing(String message);
 
-	@LogMessage
-	@Message("Event. [%s]")
+	@Message("Event. [{0}]")
 	void onEvent(String text);
 
-	@LogMessage(level = WARN)
-	@Message("Error event. [%s]")
+	@Message(value = "Error event. [{0}]", level = WARN)
 	void onErrorEvent(String text);
 
-	@LogMessage(level = WARN)
-	@Message("Unable to send! [%s]")
-	void send(String id, @Cause IOException e);
+	@Message(value = "Unable to send! [{0}]", level = WARN)
+	void send(String id, IOException e);
 
-	@LogMessage(level = WARN)
-	@Message("Unable to close! [%s]")
-	void close(String id, @Cause IOException e);
+	@Message(value = "Unable to close! [{0}]", level = WARN)
+	void close(String id, IOException e);
 
-	@LogMessage
-	@Message("Open. [id=%s]")
+	@Message("Open. [id={0}]")
 	void onOpen(String id);
 
-	@LogMessage
-	@Message("Close. [id=%s,code=%d,phrase=%s]")
+	@Message("Close. [id={0},code={1},phrase={2}]")
 	void onClose(String id, int closeCode, String reasonPhrase);
 
-	@LogMessage(level = WARN)
-	@Message("Error! [id=%s]")
-	void onError(String id, @Cause Throwable cause);
+	@Message(value = "Error! [id={0}]", level = WARN)
+	void onError(String id, Throwable cause);
 
-	@LogMessage(level = WARN)
-	@Message("Disconnecting; received message for unknown session. [%s]")
+	@Message(value = "Disconnecting; received message for unknown session. [{0}]", level = WARN)
 	void fixSessionNotFound(String msg);
 
-	@LogMessage(level = ERROR)
-	@Message("Unknown session ID during logon. [%s]")
+	@Message(value = "Unknown session ID during logon. [{0}]",level = WARN)
 	void unknownSessionIdLogon(SessionID sessionId);
 
-	@LogMessage(level = WARN)
-	@Message("Ignoring non-logon message before session established. [%s]")
+	@Message(value = "Ignoring non-logon message before session established. [{0}]", level = WARN)
 	void ignoringLogon(quickfix.Message msg);
 }

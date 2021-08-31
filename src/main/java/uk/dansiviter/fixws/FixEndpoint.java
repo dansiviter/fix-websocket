@@ -48,6 +48,7 @@ import quickfix.field.DefaultApplVerID;
 import quickfix.field.HeartBtInt;
 import quickfix.field.MsgType;
 import quickfix.mina.SessionConnector;
+import uk.dansiviter.juli.LogProducer;
 
 /**
  * @author Daniel Siviter
@@ -55,7 +56,7 @@ import quickfix.mina.SessionConnector;
  * @see quickfix.mina.acceptor.AcceptorIoHandler
  */
 public class FixEndpoint extends Endpoint {
-	private final Log log = LogProducer.log(FixEndpoint.class);
+	private final Log log = LogProducer.log(Log.class);
 
 	private SessionProvider sessionProvider;
 
@@ -231,7 +232,7 @@ public class FixEndpoint extends Endpoint {
 	 * @since v1.0 [13 Nov 2019]
 	 */
 	private static class WsResponder implements Responder {
-		private final Log log = LogProducer.log(WsResponder.class);
+		private final Log log = LogProducer.log(Log.class);
 		private final Session session;
 
 		WsResponder(Session session) {
