@@ -1,12 +1,11 @@
 [default]
 FileStorePath=target/data/executor
-ConnectionType=acceptor
+ConnectionType=initiator
 StartTime=00:00:00
 EndTime=00:00:00
 HeartBtInt=30
-ValidOrderTypes=1,2,F
-SenderCompID=*
-TargetCompID=*
+SenderCompID=WsClient
+TargetCompID=WsServer
 UseDataDictionary=Y
 DefaultMarketPrice=15
 BeginString=FIXT.1.1
@@ -15,4 +14,5 @@ TransportDataDictionary=FIXT11.xml
 AppDataDictionary=FIX50.xml
 
 [session]
-AcceptorTemplate=Y
+BeginString=FIXT.1.1
+DefaultApplVerID=FIX.5.0

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 Daniel Siviter
+ * Copyright 2019-2021 Daniel Siviter
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@ package uk.dansiviter.fixws;
 
 import static javax.enterprise.inject.spi.CDI.current;
 
+import javax.enterprise.inject.spi.CDI;
+
 import org.glassfish.tyrus.core.ComponentProvider;
 
 /**
@@ -24,23 +26,30 @@ import org.glassfish.tyrus.core.ComponentProvider;
  * @since v1.0 [13 Nov 2019]
  */
 public class CdiComponentProvider extends ComponentProvider {
+	private CDI<Object> cdi;
+
+	private CDI<Object> cdi() {
+		return this.cdi != null ? this.cdi : (this.cdi = current());
+	}
+
 	@Override
 	public boolean isApplicable(Class<?> c) {
-		return !current().getBeanManager().getBeans(c).isEmpty();
+		return !cdi().getBeanManager().getBeans(c).isEmpty();
 	}
 
 	@Override
 	public <T> Object create(Class<T> c) {
-		return current().select(c).get();
+		return cdi().select(c).get();
 	}
 
 	@Override
 	public boolean destroy(Object o) {
 		try {
-			current().destroy(o);
+			cdi().destroy(o);
 			return true;
 		} catch (UnsupportedOperationException | IllegalStateException e) {
-			return false;
+			// nothing to see here!
 		}
+		return false;
 	}
 }

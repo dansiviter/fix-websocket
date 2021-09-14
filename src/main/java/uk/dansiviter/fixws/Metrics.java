@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 Daniel Siviter
+ * Copyright 2019-2021 Daniel Siviter
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,8 +58,8 @@ public class Metrics {
 		if (!this.registry.isResolvable()) {
 			return;
 		}
-		final Tag sessionId = SESSION_ID.computeIfAbsent(id, k -> new Tag("sessionId", id.toString()));
-		final Tag msgType = MSG_TYPE.computeIfAbsent(msgType(msg), k -> new Tag("msgType", k));
+		var sessionId = SESSION_ID.computeIfAbsent(id, k -> new Tag("sessionId", id.toString()));
+		var msgType = MSG_TYPE.computeIfAbsent(msgType(msg), k -> new Tag("msgType", k));
 		this.registry.get().counter(METADATA, sessionId, inbound ? CLIENT : SERVER, msgType).inc();
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 Daniel Siviter
+ * Copyright 2019-2021 Daniel Siviter
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,9 @@ public class SessionProviderProducer {
 
 	@Produces @ApplicationScoped
 	public SessionProvider sessionProvider() {
-		return new DynamicSessionProvider(this.sessionSettings, new SessionID(FixVersions.BEGINSTRING_FIXT11, "*", "*"), this.sessionFactory);
+		return new DynamicSessionProvider(
+				this.sessionSettings,
+				new SessionID(FixVersions.BEGINSTRING_FIXT11, "*", "*"),
+				this.sessionFactory);
 	}
 }

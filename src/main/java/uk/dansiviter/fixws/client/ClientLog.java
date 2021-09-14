@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 Daniel Siviter
+ * Copyright 2021 Daniel Siviter
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,28 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.dansiviter.fixws;
+package uk.dansiviter.fixws.client;
 
+import static uk.dansiviter.juli.annotations.Message.Level.ERROR;
 import static uk.dansiviter.juli.annotations.Message.Level.WARN;
 
-import java.io.IOException;
-
 import quickfix.SessionID;
+import quickfix.SessionNotFound;
+import uk.dansiviter.fixws.FixLog;
+import uk.dansiviter.juli.annotations.Log;
 import uk.dansiviter.juli.annotations.Message;
 
-/**
- *
- * @author Daniel Siviter
- * @since v1.0 [13 Nov 2019]
- */
-@uk.dansiviter.juli.annotations.Log
-public interface Log extends FixLog {
-	@Message(value = "Unable to send! [{0}]", level = WARN)
-	void send(String id, IOException e);
-
-	@Message(value = "Unable to close! [{0}]", level = WARN)
-	void close(String id, IOException e);
-
+@Log
+public interface ClientLog extends FixLog {
 	@Message("Open. [id={0}]")
 	void onOpen(String id);
 
@@ -44,12 +35,6 @@ public interface Log extends FixLog {
 	@Message(value = "Error! [id={0}]", level = WARN)
 	void onError(String id, Throwable cause);
 
-	@Message(value = "Disconnecting; received message for unknown session. [{0}]", level = WARN)
-	void fixSessionNotFound(String msg);
-
-	@Message(value = "Unknown session ID during logon. [{0}]", level = WARN)
-	void unknownSessionIdLogon(SessionID sessionId);
-
-	@Message(value = "Ignoring non-logon message before session established. [{0}]", level = WARN)
-	void ignoringLogon(quickfix.Message msg);
+	@Message(value = "Session not found! [id={0}]", level = ERROR)
+	void sessionNotFound(SessionID id, SessionNotFound e);
 }

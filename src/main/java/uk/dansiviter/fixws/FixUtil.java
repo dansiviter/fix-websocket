@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 Daniel Siviter
+ * Copyright 2019-2021 Daniel Siviter
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,9 @@ import static quickfix.MessageUtils.getReverseSessionID;
 import static quickfix.MessageUtils.getSessionID;
 import static uk.dansiviter.fixws.ExceptionFactory.msgTypeNotFound;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Properties;
 
 import javax.annotation.Nonnull;
@@ -47,8 +45,7 @@ import quickfix.field.TargetSubID;
  * @author Daniel Siviter
  * @since v1.0 [13 Nov 2019]
  */
-public enum FixUtil {
-	;
+public enum FixUtil { ;
 	/**
 	 *
 	 * @param message
@@ -89,7 +86,7 @@ public enum FixUtil {
 	 * @see Message#setSessionID(SessionID)
 	 */
 	public static @Nonnull <M extends Message> M set(@Nonnull SessionID sessionId, @Nonnull M message) {
-		final Header header = message.getHeader();
+		var header = message.getHeader();
 		header.setString(BeginString.FIELD, sessionId.getBeginString());
 		header.setString(SenderCompID.FIELD, sessionId.getSenderCompID());
 		optionallySetID(header, SenderSubID.FIELD, sessionId.getSenderSubID());
@@ -131,24 +128,15 @@ public enum FixUtil {
 	}
 
 	public static SessionSettings settings(InputStream is, Properties variables) throws ConfigError, IOException {
-		SessionSettings settings = new SessionSettings();
+		var settings = new SessionSettings();
 		settings.setVariableValues(variables);
 		try {
-			Method method = SessionSettings.class.getDeclaredMethod("load", InputStream.class);
+			var method = SessionSettings.class.getDeclaredMethod("load", InputStream.class);
 			method.setAccessible(true);
 			method.invoke(settings, is);
 			return settings;
 		} catch (MethodNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
 			throw new IllegalStateException(e);
 		}
-	}
-
-	public static void main(String[] args) throws ConfigError, IOException {
-		String str = "[SESSION]\nCompTargetID=${target}\nFoo=${myFoo}";
-		Properties variables = new Properties();
-		variables.put("target", "acme");
-
-		SessionSettings settings = settings(new ByteArrayInputStream(str.getBytes()), variables);
-		System.out.println(settings);
 	}
 }

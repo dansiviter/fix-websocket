@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 Daniel Siviter
+ * Copyright 2019-2021 Daniel Siviter
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import javax.enterprise.event.ObservesAsync;
 import javax.inject.Inject;
 
 import quickfix.ApplicationAdapter;
-import quickfix.DataDictionaryProvider;
 import quickfix.DoNotSend;
 import quickfix.FieldNotFound;
 import quickfix.FixVersions;
@@ -62,10 +61,11 @@ public class FixApplication extends ApplicationAdapter {
 
 	@Override
 	public void fromApp(Message message, SessionID sessionId)
-			throws FieldNotFound, IncorrectDataFormat, IncorrectTagValue, UnsupportedMessageType {
+			throws FieldNotFound, IncorrectDataFormat, IncorrectTagValue, UnsupportedMessageType
+	{
 		this.metrics.on(message, sessionId, true);
 
-		final Event<Message> evt = this.messageEvent.select(msgType(message));
+		var evt = this.messageEvent.select(msgType(message));
 		evt.fire(message);
 		evt.fireAsync(message);
 	}
@@ -83,8 +83,8 @@ public class FixApplication extends ApplicationAdapter {
 	 * @param message
 	 */
 	public void on(@Observes @ToApp Message message) {
-		final SessionID sessionId = MessageUtils.getSessionID(message);
-		final quickfix.Session session = quickfix.Session.lookupSession(sessionId);
+		var sessionId = MessageUtils.getSessionID(message);
+		var session = quickfix.Session.lookupSession(sessionId);
 		if (session == null) {
 			throw sessionNotFound(sessionId);
 		}
@@ -95,7 +95,7 @@ public class FixApplication extends ApplicationAdapter {
 			}
 		}
 
-		final DataDictionaryProvider dataDictionaryProvider = session.getDataDictionaryProvider();
+		var dataDictionaryProvider = session.getDataDictionaryProvider();
 		if (dataDictionaryProvider != null) {
 			try {
 				dataDictionaryProvider.getApplicationDataDictionary(applVerId(session, message)).validate(message);
@@ -121,7 +121,7 @@ public class FixApplication extends ApplicationAdapter {
 	 * @return
 	 */
 	public ApplVerID applVerId(quickfix.Session session, Message message) {
-		final String beginString = session.getSessionID().getBeginString();
+		var beginString = session.getSessionID().getBeginString();
 		if (FixVersions.BEGINSTRING_FIXT11.equals(beginString)) {
 			return new ApplVerID(ApplVerID.FIX50);
 		}

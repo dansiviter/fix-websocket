@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 Daniel Siviter
+ * Copyright 2021 Daniel Siviter
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.dansiviter.fixws;
+package uk.dansiviter.fixws.client;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.dansiviter.fixws.FixUtil.sessionId;
 import static uk.dansiviter.fixws.FixUtil.setReverse;
 
-import java.io.IOException;
 import java.util.concurrent.LinkedTransferQueue;
-import java.util.concurrent.TransferQueue;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import javax.websocket.DeploymentException;
-import javax.websocket.EncodeException;
-import javax.websocket.Endpoint;
-import javax.websocket.EndpointConfig;
-import javax.websocket.MessageHandler.Whole;
-import javax.websocket.Session;
 
 import org.hamcrest.Matchers;
 import org.jboss.weld.junit5.WeldInitiator;
@@ -41,27 +33,29 @@ import org.jboss.weld.junit5.WeldSetup;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import quickfix.FixVersions;
-import quickfix.InvalidMessage;
+import quickfix.FieldNotFound;
+import quickfix.IncorrectDataFormat;
+import quickfix.IncorrectTagValue;
 import quickfix.Message;
-import quickfix.field.DefaultApplVerID;
-import quickfix.field.EncryptMethod;
+import quickfix.SessionID;
+import quickfix.UnsupportedMessageType;
 import quickfix.field.Headline;
-import quickfix.field.HeartBtInt;
-import quickfix.field.ResetSeqNumFlag;
 import quickfix.field.Text;
 import quickfix.fix50.News;
 import quickfix.fix50.News.NoLinesOfText;
-import quickfix.fixt11.Logon;
+import uk.dansiviter.fixws.AbstractTest;
+import uk.dansiviter.fixws.FixApplication;
+import uk.dansiviter.fixws.LogFactoryProducer;
+import uk.dansiviter.fixws.MessageStoreFactoryProducer;
+import uk.dansiviter.fixws.Metrics;
+import uk.dansiviter.fixws.SessionFactoryProducer;
+import uk.dansiviter.fixws.SessionProviderProducer;
+import uk.dansiviter.fixws.SessionSettingsProducer;
 import uk.dansiviter.fixws.annotations.FromApp;
 import uk.dansiviter.fixws.annotations.ToApp;
 import uk.dansiviter.juli.cdi.LogExtension;
 
-/**
- * @author Daniel Siviter
- * @since v1.0 [13 Nov 2019]
- */
-public class LogonTest extends AbstractTest {
+public class FixClientTest extends AbstractTest {
 	@WeldSetup
 	public WeldInitiator weld = WeldInitiator.of(
 		LogExtension.class,
@@ -74,59 +68,35 @@ public class LogonTest extends AbstractTest {
 		TestHandler.class,
 		Metrics.class);
 
-	private final TransferQueue<Message> queue = new LinkedTransferQueue<Message>();
-
 	@BeforeAll
 	public static void beforeAll() {
 		System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tFT%1$tT.%1$tL%1$tz %3$s%n%4$s: %5$s%6$s%n");
 	}
 
 	@Test
-	public void test() throws DeploymentException, IOException, InterruptedException, InvalidMessage, EncodeException {
-		var client = createClient();
+	void test() throws Exception {
+		var queue = new LinkedTransferQueue<Message>();
 
-		var session = client.connectToServer(new Endpoint() {
+		var container = createClient();
+		var client = new FixClient(container, getURI("/fix"), getClass().getResourceAsStream("/client.qfxj")) {
 			@Override
-			public void onOpen(Session session, EndpointConfig config) {
-				try {
-					session.addMessageHandler(Message.class, new Whole<Message>() {
-						@Override
-						public void onMessage(Message message) {
-							queue.add(message);
-						}
-					});
-					session.getBasicRemote().sendObject(defaults(logon()));
-				} catch (Exception e) {
-					throw new IllegalStateException(e);
-				}
+			public void onLogon(quickfix.SessionID sessionId) {
+				send(news("Howdy", "foo"));
 			}
 
 			@Override
-			public void onError(Session session, Throwable thr) {
-				thr.printStackTrace();
+			public void fromApp(Message message, SessionID sessionId)
+					throws FieldNotFound, IncorrectDataFormat, IncorrectTagValue, UnsupportedMessageType {
+				queue.add(message);
 			}
-		}, clientConfig(FixVersions.FIX50), getURI("/fix"));
+		};
 
-		var logon = queue.poll(5, SECONDS);
-		assertThat(logon, Matchers.isA(Logon.class));
-		session.getBasicRemote().sendObject(defaults(news("Howdy", "foo")));
+		client.start();
 
-		var snapshot = queue.poll(5, SECONDS);
-		assertThat(snapshot, Matchers.isA(News.class));
+		var news = queue.poll(5, SECONDS);
+		assertThat(news, Matchers.isA(News.class));
 
-		session.close();
-	}
-
-
-	// --- Static Methods ---
-
-	private static Logon logon() {
-	  var logon = new Logon();
-		logon.set(new HeartBtInt(30));
-		logon.set(new ResetSeqNumFlag(true));
-		logon.set(new DefaultApplVerID("9"));
-		logon.set(new EncryptMethod(0));
-		return logon;
+		client.close();
 	}
 
 	private static News news(String headline, String... lines) {
@@ -138,9 +108,6 @@ public class LogonTest extends AbstractTest {
 		}
 		return news;
 	}
-
-
-	// --- Inner Classes ---
 
 	/**
 	 *

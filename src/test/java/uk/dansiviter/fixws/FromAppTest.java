@@ -49,7 +49,7 @@ public class FromAppTest {
 
 	@Test
 	public void typeSafe() throws InterruptedException {
-		final Message message = new MarketDataRequest();
+		var message = new MarketDataRequest();
 
 		assertNull(service.mdr());
 
@@ -60,7 +60,7 @@ public class FromAppTest {
 
 	@Test
 	public void messageType() {
-		final Message message = new NewOrderSingle();
+		var message = new NewOrderSingle();
 
 		assertNull(service.nos());
 

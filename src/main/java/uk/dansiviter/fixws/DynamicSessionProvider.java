@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 Daniel Siviter
+ * Copyright 2019-2021 Daniel Siviter
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,8 +103,11 @@ public class DynamicSessionProvider implements SessionProvider {
 	 * @param sessionFactory   session factory for the dynamic sessions
 	 * @see TemplateMapping
 	 */
-	public DynamicSessionProvider(SessionSettings settings, List<TemplateMapping> templateMappings,
-			SessionFactory sessionFactory) {
+	public DynamicSessionProvider(
+			SessionSettings settings,
+			List<TemplateMapping> templateMappings,
+			SessionFactory sessionFactory)
+	{
 		this.settings = settings;
 		this.templateMappings = templateMappings;
 		this.sessionFactory = sessionFactory;
@@ -112,14 +115,14 @@ public class DynamicSessionProvider implements SessionProvider {
 
 	@Override
 	public synchronized Session get(SessionID sessionID) {
-		Session s = Session.lookupSession(sessionID);
+		var s = Session.lookupSession(sessionID);
 		if (s == null) {
 			try {
-				SessionID templateID = lookupTemplateID(sessionID);
+				var templateID = lookupTemplateID(sessionID);
 				if (templateID == null) {
 					throw new ConfigError("Unable to find a session template for " + sessionID);
 				}
-				SessionSettings dynamicSettings = new SessionSettings();
+				var dynamicSettings = new SessionSettings();
 				copySettings(dynamicSettings, settings.getDefaultProperties());
 				copySettings(dynamicSettings, settings.getSessionProperties(templateID));
 				dynamicSettings.setString(BEGINSTRING, sessionID.getBeginString());
@@ -142,7 +145,7 @@ public class DynamicSessionProvider implements SessionProvider {
 	}
 
 	protected SessionID lookupTemplateID(SessionID sessionID) {
-		for (TemplateMapping mapping : templateMappings) {
+		for (var mapping : templateMappings) {
 			if (isMatching(mapping.getPattern(), sessionID)) {
 				return mapping.getTemplateID();
 			}

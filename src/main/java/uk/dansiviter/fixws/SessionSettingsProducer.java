@@ -16,7 +16,6 @@
 package uk.dansiviter.fixws;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -32,7 +31,7 @@ import quickfix.SessionSettings;
 public class SessionSettingsProducer {
 	@Produces @ApplicationScoped
 	public SessionSettings sessionSettings() throws IOException, ConfigError {
-		try (InputStream is = getClass().getResourceAsStream("/settings.qfxj")) {
+		try (var is = getClass().getResourceAsStream("/settings.qfxj")) {
 			return new SessionSettings(is);
 		}
 	}

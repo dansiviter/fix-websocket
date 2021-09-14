@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 Daniel Siviter
+ * Copyright 2019-2021 Daniel Siviter
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
  */
 package uk.dansiviter.fixws;
 
+import static uk.dansiviter.juli.LogProducer.log;
+
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
 
 import quickfix.LogFactory;
-import quickfix.SessionID;
-import uk.dansiviter.juli.LogProducer;
 
 /**
  * Produces {@link Log} instances for injection.
@@ -27,49 +28,9 @@ import uk.dansiviter.juli.LogProducer;
  * @author Daniel Siviter
  * @since v1.0 [13 Nov 2019]
  */
-@ApplicationScoped
-public class LogFactoryProducer implements LogFactory {
-
-	@Override
-	public quickfix.Log create(SessionID sessionId) {
-		return new LogImpl(LogProducer.log(Log.class, "quickfix.Log:" + sessionId.toString()));
-	}
-
-	/**
-	 *
-	 * @author Daniel Siviterweld-junit5
-	 * @since v1.0 [13 Nov 2019]
-	 */
-	private static class LogImpl implements quickfix.Log {
-		private final Log log;
-
-		LogImpl(Log log) {
-			this.log = log;
-		}
-
-		@Override
-		public void onIncoming(String message) {
-			this.log.onIncoming(message);
-		}
-
-		@Override
-		public void onOutgoing(String message) {
-			this.log.onOutgoing(message);
-		}
-
-		@Override
-		public void onEvent(String text) {
-			this.log.onEvent(text);
-		}
-
-		@Override
-		public void onErrorEvent(String text) {
-			this.log.onErrorEvent(text);
-		}
-
-		@Override
-		public void clear() {
-			// NOOP
-		}
+public class LogFactoryProducer {
+	@Produces @ApplicationScoped
+	public static LogFactory logFactory() {
+		return id -> log(Log.class, "quickfix:" + id.toString());
 	}
 }

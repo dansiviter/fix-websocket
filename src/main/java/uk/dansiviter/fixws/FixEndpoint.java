@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 Daniel Siviter
+ * Copyright 2019-2021 Daniel Siviter
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,81 +83,81 @@ public class FixEndpoint extends Endpoint {
 			throws IOException, FieldNotFound, RejectLogon,
 			IncorrectDataFormat, IncorrectTagValue, UnsupportedMessageType, InvalidMessage
 	{
-		SessionID remoteSessionID = getReverseSessionID(msgStr);
-		quickfix.Session quickFixSession = findQFSession(session, remoteSessionID);
-        if (quickFixSession != null) {
-            final boolean rejectGarbledMessage = quickFixSession.isRejectGarbledMessage();
-            final quickfix.Log sessionLog = quickFixSession.getLog();
-            sessionLog.onIncoming(msgStr);
-            try {
-                Message fixMessage = parse(quickFixSession, msgStr);
-                processMessage(session, quickFixSession, fixMessage);
-            } catch (InvalidMessage e) {
-                if (rejectGarbledMessage) {
-                    final Message fixMessage = e.getFixMessage();
-                    if (fixMessage != null) {
-                        sessionLog.onErrorEvent("Processing garbled message: " + e.getMessage());
-                        processMessage(session, quickFixSession, fixMessage);
-                        return;
-                    }
-                }
-                if (isLogon(msgStr)) {
-                    sessionLog.onErrorEvent("Invalid LOGON message, disconnecting: " + e.getMessage());
-                    session.close();
-                } else {
-                    sessionLog.onErrorEvent("Invalid message: " + e.getMessage());
-                }
-            }
-        } else {
-            log.fixSessionNotFound(msgStr);
-            session.close();
-        }
+		var remoteSessionID = getReverseSessionID(msgStr);
+		var quickFixSession = findQFSession(session, remoteSessionID);
+		if (quickFixSession != null) {
+			var rejectGarbledMessage = quickFixSession.isRejectGarbledMessage();
+			var sessionLog = quickFixSession.getLog();
+			sessionLog.onIncoming(msgStr);
+			try {
+				var fixMessage = parse(quickFixSession, msgStr);
+				processMessage(session, quickFixSession, fixMessage);
+			} catch (InvalidMessage e) {
+				if (rejectGarbledMessage) {
+					var fixMessage = e.getFixMessage();
+					if (fixMessage != null) {
+						sessionLog.onErrorEvent("Processing garbled message: " + e.getMessage());
+						processMessage(session, quickFixSession, fixMessage);
+						return;
+					}
+				}
+				if (isLogon(msgStr)) {
+					sessionLog.onErrorEvent("Invalid LOGON message, disconnecting: " + e.getMessage());
+					session.close();
+				} else {
+					sessionLog.onErrorEvent("Invalid message: " + e.getMessage());
+				}
+			}
+		} else {
+			log.fixSessionNotFound(msgStr);
+			session.close();
+		}
 	}
 
 	private void processMessage(Session session, quickfix.Session qfSession, Message message)
 			throws IOException, FieldNotFound, RejectLogon, IncorrectDataFormat,
 			IncorrectTagValue, UnsupportedMessageType, InvalidMessage
 	{
-        if (qfSession == null) {
-            if (message.getHeader().getString(MsgType.FIELD).equals(MsgType.LOGON)) {
-                final SessionID sessionID = getReverseSessionID(message);
-                qfSession = this.sessionProvider.get(sessionID);
-                if (qfSession != null) {
-                    final quickfix.Log sessionLog = qfSession.getLog();
-                    if (qfSession.hasResponder()) {
-                        // Session is already bound to another connection
-                        sessionLog.onErrorEvent("Multiple logons/connections for this session are not allowed");
-                        session.close();
-                        return;
-                    }
-                    sessionLog.onEvent("Accepting session " + qfSession.getSessionID() + " from ??");
-                            // + protocolSession.getRemoteAddress());
-                    final int heartbeatInterval = message.isSetField(HeartBtInt.FIELD) ? message.getInt(HeartBtInt.FIELD) : 0;
-                    qfSession.setHeartBeatInterval(heartbeatInterval);
-                    sessionLog.onEvent("Acceptor heartbeat set to " + heartbeatInterval + " seconds");
-                    session.getUserProperties().put(QF_SESSION, qfSession);
-                    qfSession.setResponder(new WsResponder(session));
-                    if (sessionID.isFIXT()) { // QFJ-592
-                        if (message.isSetField(DefaultApplVerID.FIELD)) {
-                            final ApplVerID applVerID = new ApplVerID(
-                                    message.getString(DefaultApplVerID.FIELD));
-                            qfSession.setTargetDefaultApplicationVersionID(applVerID);
-                            sessionLog.onEvent("Setting DefaultApplVerID (" + DefaultApplVerID.FIELD + "="
-                                    + applVerID.getValue() + ") from Logon");
-                        }
-                    }
-                } else {
-                    log.unknownSessionIdLogon(sessionID);
-                    return;
-                }
-            } else {
-                log.ignoringLogon(message);
-                session.close();
-                return;
-            }
-        }
+		if (qfSession == null) {
+			if (message.getHeader().getString(MsgType.FIELD).equals(MsgType.LOGON)) {
+				var sessionID = getReverseSessionID(message);
+				qfSession = this.sessionProvider.get(sessionID);
+				if (qfSession != null) {
+					var sessionLog = qfSession.getLog();
+					if (qfSession.hasResponder()) {
+						// Session is already bound to another connection
+						sessionLog.onErrorEvent("Multiple logons/connections for this session are not allowed");
+						session.close();
+						return;
+					}
+					sessionLog.onEvent("Accepting session " + qfSession.getSessionID() + " from ??");
+									// + protocolSession.getRemoteAddress());
+					var heartbeatInterval = message.isSetField(HeartBtInt.FIELD) ? message.getInt(HeartBtInt.FIELD) : 0;
+					qfSession.setHeartBeatInterval(heartbeatInterval);
+					sessionLog.onEvent("Acceptor heartbeat set to " + heartbeatInterval + " seconds");
+					session.getUserProperties().put(QF_SESSION, qfSession);
+					qfSession.setResponder(new WsResponder(session));
+					if (sessionID.isFIXT()) { // QFJ-592
+						if (message.isSetField(DefaultApplVerID.FIELD)) {
+							var applVerID = new ApplVerID(
+									message.getString(DefaultApplVerID.FIELD));
+							qfSession.setTargetDefaultApplicationVersionID(applVerID);
+							sessionLog.onEvent("Setting DefaultApplVerID (" + DefaultApplVerID.FIELD + "="
+									+ applVerID.getValue() + ") from Logon");
+						}
+					}
+				} else {
+					log.unknownSessionIdLogon(sessionID);
+					return;
+				}
+			} else {
+				log.ignoringLogon(message);
+				session.close();
+				return;
+			}
+		}
 
-        qfSession.next(message);
+		qfSession.next(message);
 	}
 
 	/**
@@ -167,15 +167,15 @@ public class FixEndpoint extends Endpoint {
 	 * @return
 	 */
 	private quickfix.Session findQFSession(Session session, SessionID sessionID) {
-        quickfix.Session qfSession = findQFSession(session);
-        if (qfSession == null) {
-            qfSession = quickfix.Session.lookupSession(sessionID);
+		var qfSession = findQFSession(session);
+		if (qfSession == null) {
+			qfSession = quickfix.Session.lookupSession(sessionID);
 		}
 		if (qfSession == null) {
 			qfSession = sessionProvider.get(sessionID);
 			qfSession.setResponder(new WsResponder(session));
 		}
-        return qfSession;
+		return qfSession;
 	}
 
 	private static quickfix.Session findQFSession(Session session) {
@@ -219,7 +219,7 @@ public class FixEndpoint extends Endpoint {
 	 * @return
 	 */
 	public static List<String> subprotocols(List<String> in) {
-		final List<String> out = new ArrayList<>();
+		var out = new ArrayList<String>();
 		in.forEach(s -> out.add(s.toLowerCase().replaceAll("\\.", "")));
 		return out;
 	}

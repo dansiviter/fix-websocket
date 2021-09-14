@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 Daniel Siviter
+ * Copyright 2019-2021 Daniel Siviter
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ import static java.util.Collections.emptySet;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,7 +45,6 @@ import quickfix.DefaultMessageFactory;
 import quickfix.FixVersions;
 import quickfix.InvalidMessage;
 import quickfix.Message;
-import quickfix.Message.Header;
 import quickfix.MessageFactory;
 import quickfix.MessageUtils;
 import quickfix.field.ApplVerID;
@@ -61,21 +58,21 @@ import quickfix.field.TargetCompID;
  * @since v1.0 [13 Nov 2019]
  */
 @EnableWeld
-@Timeout(10)
+@Timeout(60_0)
 public abstract class AbstractTest extends TestContainer {
 	protected final AtomicInteger msgSeqNum = new AtomicInteger();
 	protected Server server;
 
 	@BeforeEach
-	public void before() throws DeploymentException, IOException {
-		try (ServerSocket s = new ServerSocket(0)) {
+	void before() throws DeploymentException, IOException {
+		try (var s = new ServerSocket(0)) {
 			setDefaultPort(s.getLocalPort());  // TestContainer doesn't update port for client
 		}
 		this.server = startServer(TestConfig.class);
 	}
 
 	@AfterEach
-	public void after() {
+	void after() {
 		this.server.stop();
 	}
 
@@ -100,9 +97,9 @@ public abstract class AbstractTest extends TestContainer {
 	 * @return
 	 */
 	protected <M extends Message> M defaults(M message, String senderCompId, String targetCompId) {
-		final Header header = message.getHeader();
+		var header = message.getHeader();
 		header.setField(new MsgSeqNum(this.msgSeqNum.incrementAndGet()));
-		header.setField(new SendingTime(LocalDateTime.now(ZoneOffset.UTC)));
+		header.setField(new SendingTime());
 		header.setField(new SenderCompID(senderCompId));
 		header.setField(new TargetCompID(targetCompId));
 		header.setField(new ApplVerID(ApplVerID.FIX50));
